@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RajaOngkir API Key Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+        
+        .result-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .result-content {
+            font-size: 14px;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-box p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚚 RajaOngkir API Tester</h1>
+        <p class="subtitle">Test apakah API key Anda berfungsi dengan baik</p>
+        
+        <div class="info-box">
+            <p><strong>Catatan:</strong> Tool ini akan mengetes API key dengan endpoint sederhana (province). Pastikan Anda sudah mendaftar di RajaOngkir dan memiliki API key.</p>
+        </div>
+        
+        <div class="input-group">
+            <label for="apiKey">API Key</label>
+            <input type="text" id="apiKey" placeholder="Masukkan API key RajaOngkir Anda" />
+        </div>
+        
+        <div class="input-group">
+            <label for="accountType">Tipe Account</label>
+            <select id="accountType">
+                <option value="starter">Starter (Gratis)</option>
+                <option value="basic">Basic</option>
+                <option value="pro">Pro</option>
+            </select>
+        </div>
+        
+        <button onclick="testAPIKey()" id="testBtn">
+            Test API Key
+        </button>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URLS = {
+            starter: 'https://api.rajaongkir.com/starter',
+            basic: 'https://api.rajaongkir.com/basic',
+            pro: 'https://pro.rajaongkir.com/api'
+        };
+
+        async function testAPIKey() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const accountType = document.getElementById('accountType').value;
+            const resultDiv = document.getElementById('result');
+            const testBtn = document.getElementById('testBtn');
+            
+            if (!apiKey) {
+                showResult('error', 'Error', 'Silakan masukkan API key terlebih dahulu!');
+                return;
+            }
+            
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="loading"></span>Testing...';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const baseUrl = API_URLS[accountType];
+                const url = `${baseUrl}/province`;
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'key': apiKey
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.rajaongkir && data.rajaongkir.status.code === 200) {
+                    const provinceCount = data.rajaongkir.results.length;
+                    showResult(
+                        'success', 
+                        '✅ API Key Valid!', 
+                        `API key Anda berfungsi dengan baik! Berhasil mengambil data ${provinceCount} provinsi.<br><br><strong>Detail Response:</strong><pre>${JSON.stringify(data.rajaongkir.status, null, 2)}</pre>`
+                    );
+                } else {
+                    const errorMsg = data.rajaongkir?.status?.description || 'Unknown error';
+                    showResult(
+                        'error', 
+                        '❌ API Key Tidak Valid', 
+                        `Error: ${errorMsg}<br><br><strong>Response:</strong><pre>${JSON.stringify(data, null, 2)}</pre>`
+                    );
+                }
+            } catch (error) {
+                showResult(
+                    'error', 
+                    '❌ Gagal Melakukan Request', 
+                    `Terjadi kesalahan: ${error.message}<br><br>Pastikan:<br>• API key benar<br>• Tipe account sesuai<br>• Koneksi internet stabil<br>• CORS diizinkan (gunakan backend jika diperlukan)`
+                );
+            } finally {
+                testBtn.disabled = false;
+                testBtn.innerHTML = 'Test API Key';
+            }
+        }
+        
+        function showResult(type, title, content) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = `
+                <div class="result-title">${title}</div>
+                <div class="result-content">${content}</div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+        
+        document.getElementById('apiKey').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                testAPIKey();
+            }
+        });
+    </script>
+</body>
+</html>
